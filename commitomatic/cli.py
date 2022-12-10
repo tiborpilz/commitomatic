@@ -31,9 +31,20 @@ def get_diff(repo_path, pick_files):
         if pick_files:
             files = repository.get_diff_files()
             fzf = FzfPrompt()
-            filtered_files = fzf.prompt(files, '--multi --cycle')
+            fzf_options = [
+                "--multi"
+                "--cycle"
+                "--info=hidden"
+                "--margin='5%'"
+                "--disabled"
+                "--ansi"
+                "--preview='git -c color.diff=always diff -- {}'"
+            ]
+            filtered_files = fzf.prompt(
+                files,
+                " ".join(fzf_options)
+            )
             repository.set_files(filtered_files)
-
         return repository.get_diff()
     else:
         with sys.stdin:
@@ -83,8 +94,8 @@ def app(
 
     chatbot = get_chatbot(config)
     response = get_chatbot_response(chatbot, prompt)
+    typer.edit(response)
 
-    print(response)
 
 def main():
     typer.run(app)
