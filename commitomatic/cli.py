@@ -62,7 +62,7 @@ def app(
             " --margin='5%'"
             " --disabled"
             " --ansi"
-            " --preview='git -c color.diff=always diff -- {}'")
+            " --preview='git -c color.diff=always diff --staged -- {}'")
         filtered_files = fzf.prompt(
             files,
             fzf_options,
