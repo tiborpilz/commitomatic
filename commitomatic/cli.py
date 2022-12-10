@@ -12,6 +12,7 @@ from .git import Repository
 from .query import get_chatbot_query
 
 from revChatGPT.revChatGPT import Chatbot
+from pyfzf.pyfzf import FzfPrompt
 
 
 def get_config():
@@ -27,8 +28,13 @@ def get_chatbot(config):
 def get_diff(repo_path, pick_files):
     if sys.stdin.isatty():
         repository = Repository(repo_path)
-        diff = repository.get_diff("--staged")
-        return diff
+        if pick_files:
+            files = repository.get_diff_files()
+            fzf = FzfPrompt()
+            filtered_files = fzf.prompt(files, '--multi --cycle')
+            repository.set_files(filtered_files)
+
+        return repository.get_diff()
     else:
         with sys.stdin:
             data = sys.stdin.read()

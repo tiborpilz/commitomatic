@@ -181,6 +181,14 @@ python-versions = "*"
 tls-client = "*"
 
 [[package]]
+name = "pyfzf"
+version = "0.3.1"
+description = "Python wrapper for junegunn's fuzzyfinder (fzf)"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pygments"
 version = "2.13.0"
 description = "Pygments is a syntax highlighting package written in Python."
@@ -327,7 +335,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "797f57b0acf5849d621e61adfd7c6eeedbe68ecbc4054e5a0bca621faee15f2b"
+content-hash = "4002ec501ad6df2ff1357240bb48e05b386a3927e43f651e08e3f19ef106ef40"
 
 [metadata.files]
 anyio = [
@@ -393,6 +401,10 @@ idna = [
 openaiauth = [
     {file = "OpenAIAuth-0.0.6-py3-none-any.whl", hash = "sha256:f7584bb99db7edace6a08a55696bacdf8e2ffd254a94496226b9fb57c7b7ee62"},
     {file = "OpenAIAuth-0.0.6.tar.gz", hash = "sha256:cbc4d7a57069dba0fc7f8d3b7803866f6c149444344f9d93656f049b7fdad1cd"},
+]
+pyfzf = [
+    {file = "pyfzf-0.3.1-py3-none-any.whl", hash = "sha256:736f71563461b75f6f85b55345bdc638fa0dc14c32c857c59e8b1ca1cfa3cf4a"},
+    {file = "pyfzf-0.3.1.tar.gz", hash = "sha256:dd902e34cffeca9c3082f96131593dd20b4b3a9bba5b9dde1b0688e424b46bd2"},
 ]
 pygments = [
     {file = "Pygments-2.13.0-py3-none-any.whl", hash = "sha256:f643f331ab57ba3c9d89212ee4a2dabc6e94f117cf4eefde99a0574720d14c42"},
