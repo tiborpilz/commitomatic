@@ -17,3 +17,6 @@ pyperclip = "^1.8.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+ccm = "chatgpt_commit_messages.cli:main"

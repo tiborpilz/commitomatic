@@ -25,7 +25,6 @@ def get_diff():
     return data
 
 def get_chatbot_query(emoji, body, choices, commit_type, commit_scope, diff):
-    return "Generate a commit message for the following diff:\n\n" + diff
     query = "I will provide you with a git diff. I want you to generate a single commit message, briefly summarizing that diff. The header has to follow convenctional commit style.\n"
     query += "\n"
     query += f"Your commit header should start with ${'an appropriate github emoji' if emoji else ''} a commit type, followed by the scope of the changes in parentheses, followed by a colon, and then a brief description of the changes.\n"
@@ -56,7 +55,7 @@ def get_chatbot_response(chatbot, query):
     response_obj = chatbot.get_chat_response(query)
     return response_obj["message"]
 
-def main(
+def app(
     emoji: bool = typer.Option(True, help="Whether to add Github-Style Emoji"),
     body: bool = typer.Option(True, help="Whether to add a commit body"),
     choices: int = typer.Option(1, help="The number of choices to return"),
@@ -75,11 +74,11 @@ def main(
     chatbot = get_chatbot(config)
     response = get_chatbot_response(chatbot, query)
     total = 0
-    for value in track(range(100), description="Generating commit messages..."):
+    for _ in track(range(100), description="Generating commit messages..."):
         sleep(0.01)
         total += 1
 
     print(response)
 
-if __name__ == "__main__":
-    typer.run(main)
+def main():
+    typer.run(app)
