@@ -3,3 +3,4 @@ dist
 result
 **/*.pyc
 **/*.whl
+.venv

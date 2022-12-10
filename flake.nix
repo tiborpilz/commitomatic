@@ -1,5 +1,5 @@
 {
-  description = "ChatGPT Commit Message Generator";
+  description = "Commitomatic is a commit message generator based on ChatGPT";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -29,17 +29,25 @@
           nix repl $confnix
         '';
 
-        packages.chatgpt-commit-messages = pkgs.poetry2nix.mkPoetryApplication {
+        packages.commitomatic = pkgs.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
+          meta = with nixpkgs.lib; {
+            inherit description;
+            homepage = "https://github.com/tiborpilz/commitomatic";
+            license = licenses.gpl3;
+            platforms = platforms.all;
+          };
         };
+
+        packages.default = packages.commitomatic;
 
         apps = {
           repl = flake-utils.lib.mkApp { drv = packages.flakeRepl; };
-          ccm = flake-utils.lib.mkApp { drv = packages.chatgpt-commit-message; };
+          commitomatic = flake-utils.lib.mkApp { drv = packages.commitomatic; };
         };
 
-        defaultApp = apps.ccm;
+        defaultApp = apps.commitomatic;
 
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [

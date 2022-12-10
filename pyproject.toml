@@ -1,15 +1,14 @@
 [tool.poetry]
-name = "chatgpt-commit-messages"
-version = "0.1.0"
+name = "commitomatic"
+version = "0.1.1"
 description = ""
-authors = ["Tibor Pilz <tibor.pilz@avenga.com>"]
+authors = ["Tibor Pilz <tibor@pilz.berlin>"]
 readme = "README.md"
-packages = [{include = "chatgpt_commit_messages"}]
+packages = [{include = "commitomatic"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 revchatgpt = "^0.0.34.1"
-gitpython = "^3.1.29"
 typer = {extras = ["all"], version = "^0.7.0"}
 pyperclip = "^1.8.2"
 
@@ -19,4 +18,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-ccm = "chatgpt_commit_messages.cli:main"
+commitomatic = "commitomatic.cli:main"
