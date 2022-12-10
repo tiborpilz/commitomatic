@@ -1,1 +1,5 @@
 **/config.json
+dist
+result
+**/*.pyc
+**/*.whl
