@@ -1,4 +1,3 @@
-import sys
 import json
 import typer
 from typing import Optional
@@ -23,14 +22,6 @@ def get_config():
 
 def get_chatbot(config):
     return Chatbot(config, conversation_id=None)
-
-
-def get_diff(repo_path, pick_files):
-    if sys.stdin.isatty():
-    else:
-        with sys.stdin:
-            data = sys.stdin.read()
-        return data
 
 
 def get_chatbot_response(chatbot, query):
@@ -64,21 +55,20 @@ def app(
     if pick_files:
         files = repository.get_diff_files()
         fzf = FzfPrompt()
-        fzf_options = [
+        fzf_options = (
             "--multi"
-            "--cycle"
-            "--info=hidden"
-            "--margin='5%'"
-            "--disabled"
-            "--ansi"
-            "--preview='git -c color.diff=always diff -- {}'"
-        ]
+            " --cycle"
+            " --info=hidden"
+            " --margin='5%'"
+            " --disabled"
+            " --ansi"
+            " --preview='git -c color.diff=always diff -- {}'")
         filtered_files = fzf.prompt(
             files,
-            " ".join(fzf_options)
+            fzf_options,
         )
         repository.set_files(filtered_files)
-    repository.get_diff()
+    diff = repository.get_diff()
 
     skip_query = dry_run or (diff is None)
 
@@ -93,8 +83,12 @@ def app(
 
     chatbot = get_chatbot(config)
     response = get_chatbot_response(chatbot, prompt)
-    buffer = response + "\n" + repository.get_message_footer()
+    # buffer = response + "\n" + repository.get_message_footer() TODO: Use buffer when fixed
     commit_message = typer.edit(response, require_save=True)
+
+    if commit_message is not None:
+        repository.git.commit(f"-m{commit_message}")
+
 
 def main():
     typer.run(app)
