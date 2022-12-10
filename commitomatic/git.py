@@ -50,6 +50,7 @@ class Repository(object):
         else:
             self.disable_flag(flag)
 
+    # TODO: Fix this
     def get_message_footer(self):
         author = self.git.config("user.name")
         email = self.git.config("user.email")
