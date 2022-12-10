@@ -27,25 +27,6 @@ def get_chatbot(config):
 
 def get_diff(repo_path, pick_files):
     if sys.stdin.isatty():
-        repository = Repository(repo_path)
-        if pick_files:
-            files = repository.get_diff_files()
-            fzf = FzfPrompt()
-            fzf_options = [
-                "--multi"
-                "--cycle"
-                "--info=hidden"
-                "--margin='5%'"
-                "--disabled"
-                "--ansi"
-                "--preview='git -c color.diff=always diff -- {}'"
-            ]
-            filtered_files = fzf.prompt(
-                files,
-                " ".join(fzf_options)
-            )
-            repository.set_files(filtered_files)
-        return repository.get_diff()
     else:
         with sys.stdin:
             data = sys.stdin.read()
@@ -79,7 +60,25 @@ def app(
 
     repo_path = repo_path or Path.cwd()
 
-    diff = get_diff(repo_path, pick_files)
+    repository = Repository(repo_path)
+    if pick_files:
+        files = repository.get_diff_files()
+        fzf = FzfPrompt()
+        fzf_options = [
+            "--multi"
+            "--cycle"
+            "--info=hidden"
+            "--margin='5%'"
+            "--disabled"
+            "--ansi"
+            "--preview='git -c color.diff=always diff -- {}'"
+        ]
+        filtered_files = fzf.prompt(
+            files,
+            " ".join(fzf_options)
+        )
+        repository.set_files(filtered_files)
+    repository.get_diff()
 
     skip_query = dry_run or (diff is None)
 
@@ -94,8 +93,8 @@ def app(
 
     chatbot = get_chatbot(config)
     response = get_chatbot_response(chatbot, prompt)
-    typer.edit(response)
-
+    buffer = response + "\n" + repository.get_message_footer()
+    commit_message = typer.edit(response, require_save=True)
 
 def main():
     typer.run(app)

@@ -29,3 +29,53 @@ class Repository(object):
 
     def set_files(self, files):
         self.files = files
+
+    def toggle_flag(self, flag):
+        if flag in self.flags:
+            self.flags = [f for f in self.flags if f != flag]
+        else:
+            slef.flags.append(f)
+
+    def enable_flag(self, flag):
+        if flag not in self.flags:
+            self.flags.append(flag)
+
+    def disable_flag(self, flag):
+        if flag in self.flags:
+            self.flags = [f for f in self.flags if f != flag]
+
+    def set_flag(self, flag, value):
+        if value:
+            self.enable_flag(flag)
+        else:
+            self.disable_flag(flag)
+
+    def get_message_footer(self):
+        author = self.git.config("user.name")
+        email = self.git.config("user.email")
+        branch = self.git.rev_parse("--abbrev-ref", "HEAD")
+
+        staged = "staged" in self.flags
+
+        self.enable_flag("--staged")
+        staged_files = self.get_diff_files()
+
+        self.disable_flag("--staged")
+        unstaged_files = self.get_diff_files()
+
+        self.set_flag("--staged", staged)
+
+        message = f"\n# Author:     {author} <{email}>\n"
+        message += "#\n"
+        message += f"# On branch  {branch}\n"
+
+        message += "# Changes to be committed:\n"
+        for file in staged_files:
+            message += f"#\file:   {file}\n"
+
+        message += "# Changes not staged for commit:\n"
+        for file in unstaged_files:
+            message += f"#\file:   {file}\n"
+
+        message += "#"
+        return message
