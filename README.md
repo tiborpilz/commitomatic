@@ -1,3 +1,6 @@
+[![DeepSource](https://deepsource.io/gh/tiborpilz/commitomatic.svg/?label=active+issues&show_trend=true&token=HXOj050y_0e28wz3hpVDSbg6)](https://deepsource.io/gh/tiborpilz/commitomatic/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/tiborpilz/commitomatic.svg/?label=resolved+issues&show_trend=true&token=HXOj050y_0e28wz3hpVDSbg6)](https://deepsource.io/gh/tiborpilz/commitomatic/?ref=repository-badge)
+
 # Commitomatic
 
 Commitomatic is a command-line tool that uses the OpenAI ChatGPT bot to generate commit messages based on a git diff.
