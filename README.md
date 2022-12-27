@@ -3,37 +3,26 @@
 
 # Commitomatic
 
-Commitomatic is a command-line tool that uses the OpenAI ChatGPT bot to generate commit messages based on a git diff.
+Commitomatic is a command-line tool that uses the OpenAI GPT-Codex to generate commit messages based on a git diff.
 
-The queries are adjustable to customize the given commit message style.
+## Dependencies
 
-Under the hood, it uses [acheong08's reverse engineered ChatGPT API](https://github.com/acheong08/ChatGPT) to interface with the OpenAI chatbot.
+### Nix
 
-## Getting started
+Commitomatic uses [Nix](https://nixos.org/) to manage dependencies. You need to have Nix installed to build and run Commitomatic.
 
-To build or run Commitomatic you will need to have [Nix](https://nixos.org/nix/) with flakes enabled installed on your system.
+### OpenAI API key
 
-Once you have Nix installed, you can use the following command to run commitomatic:
+Commitomatic uses the OpenAI API to generate commit messages. You need to have an OpenAI API key to use Commitomatic. You can create one [here](https://beta.openai.com/). Note that you need to be signed up to OpenAI to use the API.
 
-``` sh
+Commitomatic reads the OpenAI API key from the `OPENAI_API_KEY` environment variable. You can set it in your shell configuration file.
+
+## Running Commitomatic
+
+To run Commitomatic, you need to have a git repository with staged changes. You can then run Commitomatic with the following command:
+
+```bash
 nix run github:tiborpilz/commitomatic
 ```
 
-To authenticate with OpenAI you'll need to add your OpenAI (Auth0) user credentials in a `config.json` file. You can either use `username` and `password`:
-
-``` json
-{
-  "username": "[my_username]",
-  "password": "[my_password]"
-}
-```
-
-or a `session_token`, which you can obtain by visiting `https://chat.openai.com/api/auth/session` while logged in to OpenAi. Simply copy the `accessToken`.
-
-1.
-
-``` json
-{
-  "session_token": "[accessToken]"
-}
-```
+Commitomatic will then generate a commit message based on the staged changes and open your editor to let you edit the commit message. AFter you save and close the editor, Commitomatic will commit the staged changes using the commit message.
