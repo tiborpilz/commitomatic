@@ -4,7 +4,6 @@
 # If yes, get all files that have been changed and prompt the user with a multiselection,
 # Afterwards, create a new diff with only the selected files.
 
-import os
 from pathlib import Path
 from git import Repo
 

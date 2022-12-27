@@ -1,25 +1,25 @@
 import json
 import os
 import typer
-from typing import Optional
+from typing import Optional, Dict
 from pathlib import Path
 from rich.padding import Padding
 from rich.markdown import Markdown
 from rich import print
 import pyperclip
 import openai
+from pyfzf.pyfzf import FzfPrompt
 
 from .git import Repository
 from .query import get_gpt_codex_prompt
 
-from pyfzf.pyfzf import FzfPrompt
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-def get_config():
+def get_config() -> Dict:
+    """Load config from file."""
     with open("config.json") as f:
         config = json.load(f)
     return config
+
 
 def app(
     repo_path: Optional[Path] = typer.Argument(
@@ -37,32 +37,14 @@ def app(
     dry_run: bool = typer.Option(False, help="Whether to print the query and exit", is_flag=True),
     pick_files: bool = typer.Option(False, help="Whether to pick the files interactively", is_flag=True),
 ):
-    repo_path = repo_path or Path.cwd()
+    """Generate commit messages from GPT-2 with openai.com"""
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
+    repo_path = repo_path or Path.cwd()
     repository = Repository(repo_path)
+
     if pick_files:
-        files = repository.get_diff_files()
-        fzf = FzfPrompt()
-        preview_command = (
-            "git -c color.diff=always diff" +
-            (" --staged" if repository.use_staged else "") +
-            " -- {}"
-        )
-        fzf_options = (
-            "--multi"
-            " --cycle"
-            " --info=hidden"
-            " --margin='5%'"
-            " --disabled"
-            " --ansi"
-            f" --preview='{preview_command}'"
-            " --bind='start:last+select-all'"
-        )
-        filtered_files = fzf.prompt(
-            files,
-            fzf_options,
-        )
-        repository.set_files(filtered_files)
+        pick_files(repository)
     else:
         repository.set_files(repository.get_diff_files())
 
@@ -107,11 +89,38 @@ def app(
 
     body = body_response["choices"][0]["text"]
 
-    print(f"{header}\n{body}")
     commit_message = typer.edit(f"{header}\n{body}", require_save=True)
 
     if commit_message is not None:
         repository.git.commit(f"-m{commit_message}")
 
+
+def pick_files(repository: Repository):
+    """Prompt for files to use for the commit message."""
+    files = repository.get_diff_files()
+    fzf = FzfPrompt()
+    preview_command = (
+        "git -c color.diff=always diff" +
+        (" --staged" if repository.use_staged else "") +
+        " -- {}"
+    )
+    fzf_options = (
+        "--multi"
+        " --cycle"
+        " --info=hidden"
+        " --margin='5%'"
+        " --disabled"
+        " --ansi"
+        f" --preview='{preview_command}'"
+        " --bind='start:last+select-all'"
+    )
+    filtered_files = fzf.prompt(
+        files,
+        fzf_options,
+    )
+    repository.set_files(filtered_files)
+
+
 def main():
+    """Run the CLI."""
     typer.run(app)
