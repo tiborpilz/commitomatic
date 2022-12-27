@@ -4,25 +4,46 @@
 # If yes, get all files that have been changed and prompt the user with a multiselection,
 # Afterwards, create a new diff with only the selected files.
 
+import os
 from pathlib import Path
 from git import Repo
 
 
 class Repository(object):
-    def __init__(self, path: Path, staged: bool = True):
+    def __init__(self, path: Path, use_staged: bool = True):
         self.diff_target = None
         self.path = path
         # TODO: error handling
         self.repo = Repo(path)
         assert not self.repo.bare
         self.git = self.repo.git
-        self.files = None
-        self.flags = ["--staged"] if staged else []
+        self.files = []
+        self.use_staged = use_staged
+        self.flags = []
+        self.flags.append("-U0")
+        if self.use_staged:
+            self.flags.append("--staged")
+        self.max_lines = 300
 
-    def get_diff(self, *flags, **kwargs):
+    def get_diff(self, *flags, files=None, **kwargs):
         params = [f"--{key} {value}" for key, value in kwargs.items()]
-        file_args = ["--", *self.files] if self.files is not None else []
+        if files is not None:
+            file_args = ["--", *files]
+        elif self.files is not None:
+            file_args = ["--", *self.files]
+        else:
+            file_args = []
         return self.git.diff(self.diff_target, *self.flags, *flags, *params, *file_args)
+
+    def file_lines_changed(self, file):
+        diff = self.get_diff(files=[file])
+        change_lines = [line for line in diff.split("\n")
+                        if line.startswith("+") or line.startswith("-")]
+        return len(change_lines)
+
+    def filter_files_by_changed_lines(self):
+        self.files = [file for file in self.files if
+                      self.file_lines_changed(file) < self.max_lines]
 
     def get_diff_files(self):
         return self.get_diff("--name-only").split("\n")
@@ -34,7 +55,7 @@ class Repository(object):
         if flag in self.flags:
             self.flags = [f for f in self.flags if f != flag]
         else:
-            slef.flags.append(f)
+            self.flags.append(f)
 
     def enable_flag(self, flag):
         if flag not in self.flags:
