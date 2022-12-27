@@ -1,24 +1,21 @@
-def get_chatbot_query(emoji, body, choices, commit_type, commit_scope):
-    query = "I will provide you with a git diff. I want you to generate a single commit message, briefly summarizing that diff. The header has to follow convenctional commit style.\n"
-    query += "\n"
-    query += f"Your commit header should start with ${'an appropriate github emoji' if emoji else ''} a commit type, followed by the scope of the changes in parentheses, followed by a colon, and then a brief description of the changes.\n"
-    if commit_type:
-        query += f"The type is ${commit_type}.'\n"
-    if commit_scope:
-        query += f"This scope is ${commit_scope}.'\n"
-    if body:
-        query += "Summarize the most important changes in the commit body.\nYou don't need to include every change.\nThe body should not be longer than 6 lines."
+def get_gpt_codex_prompt(diff, header=None, commit_type=None):
+    """Get the prompt for GPT-Codex."""
+    git_diff = "git diff ."
+
+    if header:
+        commit_command = f"git commit -m <<EOF {header}\n"
+    elif commit_type:
+        commit_command = f"git commit -m <<EOF {commit_type}: "
     else:
-        query += "Don't append a body, use only the commit header.\n"
+        commit_command = "git commit -m <<EOF"
+    prompt = f"git diff .\n{diff}\n\n{commit_command}"
+    return prompt
 
-    query += "Do not answer with anything but the generated commit message, and output your response in code fences.\n"
+def get_gpt_prompt(diff):
+    """Get the prompt for GPT."""
 
-    query += "\n"
-    if choices > 1:
-        query += "Give me ${CHOICES} different messages to choose from"
-        if body:
-            query += ", each with a commit body"
-        query += " .Seperate the choices using three dashes: '---'\n"
-
-    query += "this is the commit's diff:\n\n"
+    query = "# Write a commit message for the following diff. Use conventional commit style. Add bullet points in the body.\n"
+    query += "# Start diff\n"
+    query += diff
+    query += "\n# End diff\n"
     return query
