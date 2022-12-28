@@ -1,0 +1,36 @@
+diff --git a/commitomatic/git.py b/commitomatic/git.py
+index 5bccfbe..82c2f51 100644
+--- a/commitomatic/git.py
++++ b/commitomatic/git.py
+@@ -8,13 +8,14 @@ from pathlib import Path
+ from git import Repo
+ 
+ 
+-class Repository(object):
++class Repository():
++    repo = Repo(Path.cwd())
++
+     def __init__(self, path: Path, use_staged: bool = True):
+         self.diff_target = None
+         self.path = path
+         # TODO: error handling
+         self.repo = Repo(path)
+-        assert not self.repo.bare
+         self.git = self.repo.git
+         self.files = []
+         self.use_staged = use_staged
+@@ -32,7 +33,13 @@ class Repository(object):
+             file_args = ["--", *self.files]
+         else:
+             file_args = []
+-        return self.git.diff(self.diff_target, *self.flags, *flags, *params, *file_args)
++        return self.git.diff(
++            self.diff_target,
++            *self.flags,
++            *flags,
++            *params,
++            *file_args
++        )
+ 
+     def file_lines_changed(self, file):
+         diff = self.get_diff(files=[file])
