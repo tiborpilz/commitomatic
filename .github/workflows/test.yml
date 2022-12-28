@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -19,6 +22,7 @@ jobs:
           installer-parallel: true
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root
+
       - name: Test
         run: |
           poetry run pytest --cov=commitomatic --cov-report=xml
