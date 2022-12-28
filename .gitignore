@@ -4,3 +4,5 @@ result
 **/*.pyc
 **/*.whl
 .venv
+.coverage
+coverage.xml
