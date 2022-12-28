@@ -24,5 +24,12 @@ jobs:
           poetry run pytest --cov=commitomatic --cov-report=xml
           curl https://deepsource.io/cli | sh
           ./bin/deepsource report --analyzer test-coverage --key python --value-file $PWD/coverage.xml
+          rate=$(grep -Pio 'line-rate="\K[^"]*' coverage.xml | head -n1)
+          percentage=$(echo "100 * $rate" | bc)
+          percentage_rounded=$(printf "%.f" $percentage)
+          echo "lines=${percentage_rounded}" >> $GITHUB_OUTPUT
+          echo "path=${BADGE_PATH}" >> $GITHUB_OUTPUT
+          echo "branch=badges" >> $GITHUB_OUTPUT
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+          BADGE_PATH: ${{ steps.extract_branch.outputs.branch }}/test-badge.svg
