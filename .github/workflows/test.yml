@@ -26,7 +26,7 @@ jobs:
       - name: Test
         id: test
         run: |
-          poetry run pytest --cov=commitomatic --cov-report=xml
+          poetry run pytest --cov=commitomatic --cov-report=xml --cov-report=html
           curl https://deepsource.io/cli | sh
           ./bin/deepsource report --analyzer test-coverage --key python --value-file $PWD/coverage.xml
           rate=$(grep -Pio 'line-rate="\K[^"]*' coverage.xml | head -n1)
@@ -38,6 +38,15 @@ jobs:
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
           BADGE_PATH: test-coverage.svg
+
+      - name: Deploy Coverage Report to Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: htmlcov
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v3
         with:
