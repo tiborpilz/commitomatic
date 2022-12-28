@@ -44,7 +44,7 @@ def app(
     repository = Repository(repo_path)
 
     if pick_files:
-        pick_files(repository)
+        fzf_pick_files(repository)
     else:
         repository.set_files(repository.get_diff_files())
 
@@ -95,7 +95,7 @@ def app(
         repository.git.commit(f"-m{commit_message}")
 
 
-def pick_files(repository: Repository):
+def fzf_pick_files(repository: Repository):
     """Prompt for files to use for the commit message."""
     files = repository.get_diff_files()
     fzf = FzfPrompt()
