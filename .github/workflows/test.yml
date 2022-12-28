@@ -20,4 +20,9 @@ jobs:
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root
       - name: Test
-        run: poetry run pytest
+        run: |
+          poetry run pytest --cov=commitomatic --cov-report=xml
+          curl https://deepsource.io/cli | sh
+          ./bin/deepsource report --analyzer test-coverage --key python --value-file $PWD/coverage.xml
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
