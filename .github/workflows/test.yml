@@ -24,6 +24,7 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Test
+        id: test
         run: |
           poetry run pytest --cov=commitomatic --cov-report=xml
           curl https://deepsource.io/cli | sh
@@ -36,28 +37,41 @@ jobs:
           echo "branch=badges" >> $GITHUB_OUTPUT
         env:
           DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-          BADGE_PATH: ${{ steps.extract_branch.outputs.branch }}/test-badge.svg
+          BADGE_PATH: test-coverage.svg
+
+      - uses: actions/checkout@v3
+        with:
+          ref: badges
 
       - name: Generate the badge SVG image
         uses: emibcn/badge-action@v2.0.2
         id: badge
         with:
           label: 'Test coverage'
-          status: ${{ steps.coverage.outputs.lines }}
-          color: 'blue,555,daf'
-          path: ${{ steps.coverage.outputs.path }}
+          status: ${{ steps.test.outputs.lines }}%
+          color: ${{
+            steps.test.outputs.lines > 90 && 'green'              ||
+            steps.test.outputs.lines > 80 && 'yellow,green'       ||
+            steps.test.outputs.lines > 70 && 'yellow'             ||
+            steps.test.outputs.lines > 60 && 'orange,yellow'      ||
+            steps.test.outputs.lines > 50 && 'orange'             ||
+            steps.test.outputs.lines > 40 && 'red,orange'         ||
+            steps.test.outputs.lines > 30 && 'red,red,orange'     ||
+            steps.test.outputs.lines > 20 && 'red,red,red,orange' ||
+            'red' }}
+          path: ${{ steps.test.outputs.path }}
 
       - name: Upload badge as artifact
         uses: actions/upload-artifact@v3
         with:
           name: badge
-          path: ${{ steps.coverage.outputs.path }}
+          path: ${{ steps.test.outputs.path }}
           if-no-files-found: error
 
       - name: Commit badge
         continue-on-error: true
         env:
-          BADGE: ${{ steps.coverage.outputs.path }}
+          BADGE: ${{ steps.test.outputs.path }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -69,4 +83,4 @@ jobs:
         if: ${{ success() }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.coverage.outputs.branch }}
+          branch: ${{ steps.test.outputs.branch }}
