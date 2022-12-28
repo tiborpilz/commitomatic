@@ -1,0 +1,13 @@
+
+# Author:     Test User <test@example.com>
+#
+# On branch  test/example-branch
+# Changes to be committed:
+# file:   poetry.lock
+# file:   pyproject.toml
+# file:   commitomatic/git.py
+# Changes not staged for commit:
+# file:   poetry.lock
+# file:   pyproject.toml
+# file:   commitomatic/git.py
+#
