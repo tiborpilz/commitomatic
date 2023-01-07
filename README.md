@@ -19,10 +19,10 @@ Commitomatic reads the OpenAI API key from the `OPENAI_API_KEY` environment vari
 
 ## Running Commitomatic
 
-To run Commitomatic, you need to have a git repository with staged changes. You can then run Commitomatic with the following command:
+To run Commitomatic, you need have a git repository with staged changes. You can then run Commitomatic inside of the repository's directory with the following command:
 
 ```bash
-nix run github:tiborpilz/commitomatic
+nix run github:tiborpilz/commitomatic .
 ```
 
-Commitomatic will then generate a commit message based on the staged changes and open your editor to let you edit the commit message. AFter you save and close the editor, Commitomatic will commit the staged changes using the commit message.
+Commitomatic will then generate a commit message based on the staged changes and open your editor to let you edit the commit message. After you save and close the editor, Commitomatic will commit the staged changes using the commit message.
