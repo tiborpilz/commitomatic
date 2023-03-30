@@ -1,6 +1,21 @@
 name: CI
 on: pull_request
 
+permissions:
+  actions: write
+  checks: write
+  contents: write
+  deployments: write
+  id-token: write
+  issues: write
+  packages: write
+  pages: write
+  pull: write
+  repository: write
+  security: write
+  statuses: write
+
+
 jobs:
   ci:
     strategy:
@@ -8,6 +23,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -19,5 +37,87 @@ jobs:
           installer-parallel: true
       - name: Install Dependencies
         run: poetry install --no-interaction --no-root
+
       - name: Test
-        run: poetry run pytest
+        id: test
+        run: |
+          poetry run pytest --cov=commitomatic --cov-report=xml --cov-report=html
+          curl https://deepsource.io/cli | sh
+          ./bin/deepsource report --analyzer test-coverage --key python --value-file $PWD/coverage.xml
+          rate=$(grep -Pio 'line-rate="\K[^"]*' coverage.xml | head -n1)
+          percentage=$(echo "100 * $rate" | bc)
+          percentage_rounded=$(printf "%.f" $percentage)
+          echo "lines=${percentage_rounded}" >> $GITHUB_OUTPUT
+          echo "path=${BADGE_PATH}" >> $GITHUB_OUTPUT
+          echo "branch=badges" >> $GITHUB_OUTPUT
+        env:
+          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+          BADGE_PATH: test-coverage.svg
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: 'htmlcov'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+
+      - name: Deploy Coverage Report to Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: htmlcov
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v3
+        with:
+          ref: badges
+
+      - name: Generate the badge SVG image
+        uses: emibcn/badge-action@v2.0.2
+        id: badge
+        with:
+          label: 'Test coverage'
+          status: ${{ steps.test.outputs.lines }}%
+          color: ${{
+            steps.test.outputs.lines > 90 && 'green'              ||
+            steps.test.outputs.lines > 80 && 'yellow,green'       ||
+            steps.test.outputs.lines > 70 && 'yellow'             ||
+            steps.test.outputs.lines > 60 && 'orange,yellow'      ||
+            steps.test.outputs.lines > 50 && 'orange'             ||
+            steps.test.outputs.lines > 40 && 'red,orange'         ||
+            steps.test.outputs.lines > 30 && 'red,red,orange'     ||
+            steps.test.outputs.lines > 20 && 'red,red,red,orange' ||
+            'red' }}
+          path: ${{ steps.test.outputs.path }}
+
+      - name: Upload badge as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: badge
+          path: ${{ steps.test.outputs.path }}
+          if-no-files-found: error
+
+      - name: Commit badge
+        continue-on-error: true
+        env:
+          BADGE: ${{ steps.test.outputs.path }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "${BADGE}"
+          git commit -m "Add/Update badge"
+
+      - name: Push badge commit
+        uses: ad-m/github-push-action@master
+        if: ${{ success() }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.test.outputs.branch }}
