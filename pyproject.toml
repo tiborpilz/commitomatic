@@ -10,7 +10,7 @@ packages = [{include = "commitomatic"}]
 python = "^3.10"
 typer = {extras = ["all"], version = "^0.7.0"}
 pyperclip = "^1.8.2"
-gitpython = "^3.1.29"
+gitpython = "^3.1.32"
 pyfzf = "^0.3.1"
 openai = "^0.25.0"
 pytest = "^7.2.0"
